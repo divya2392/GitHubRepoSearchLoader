@@ -182,12 +182,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public Loader<String> onCreateLoader(int id, final Bundle args) {
         return new AsyncTaskLoader<String>(this) {
 
+            String mGithubJson;
+
             @Override
             protected void onStartLoading() {
                 super.onStartLoading();
                 /* If no arguments were passed, we don't have a query to perform. Simply return. */
-                if(args == null)
-                {
+                if (args == null) {
                     return;
                 }
                 /*
@@ -195,7 +196,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                  * loading indicator to the user
                  */
                 mLoadingIndicator.setVisibility(View.VISIBLE);
-                forceLoad();
+
+                /*
+                 * If we already have cached results, just deliver them now. If we don't have any
+                 * cached results, force a load.
+                 */
+
+                if (mGithubJson != null) {
+                    deliverResult(mGithubJson);
+                } else {
+                    forceLoad();
+                }
             }
 
 
@@ -219,6 +230,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                     return null;
                 }
+            }
+
+            @Override
+            public void deliverResult(String githubJson) {
+                mGithubJson = githubJson;
+                super.deliverResult(githubJson);
             }
         };
     }
